@@ -1,1 +1,39 @@
 # cpsc-4190-26fa-project-group-1
+
+# Eli Markets
+
+A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
+
+## Run it locally
+
+1. Install PostgreSQL (Mac):
+
+   ```bash
+   brew install postgresql@16
+   brew services start postgresql@16
+   createdb elimarkets
+   ```
+
+2. Set up Python:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   cp .env.example .env
+   ```
+
+3. Load the database (once schema.sql and seed.sql are filled in):
+
+   ```bash
+   psql elimarkets -f schema.sql
+   psql elimarkets -f seed.sql
+   ```
+
+4. Start the app:
+
+   ```bash
+   flask --app wsgi run
+   ```
+
+   Then open http://127.0.0.1:5000
