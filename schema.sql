@@ -1,0 +1,62 @@
+-- Eli markets partial schema: users, markets, trades, positions
+-- Rerunnable: the drop below wipes the tables (and their data) every run
+
+DROP TABLE IF EXISTS positions, trades, markets, users CASCADE;
+
+-- Everyone who can hold coins: students, the admin account, the AI player
+CREATE TABLE users (
+    id            SERIAL PRIMARY KEY, 
+    yale_email    TEXT UNIQUE, 
+    password_hash TEXT, 
+    display_name  TEXT NOT NULL,
+    balance_cents INTEGER NOT NULL DEFAULT 100000 CHECK (balance_cents >= 0),
+    is_ai         BOOLEAN DEFAULT FALSE,
+    model_name    TEXT,
+    is_admin      BOOLEAN DEFAULT FALSE,
+    created_at    TIMESTAMPTZ DEFAULT now() 
+);
+
+-- One row per question, q_yes, q_no and b are the LMSR parameters 
+CREATE TABLE markets (
+    id              SERIAL PRIMARY KEY,
+    creator_id      INTEGER REFERENCES users (id),
+    question        TEXT NOT NULL,
+    description     TEXT,
+    resolution_rule TEXT NOT NULL,
+    closes_at       TIMESTAMPTZ NOT NULL, 
+    status          TEXT DEFAULT 'open' CHECK (status IN ('open', 'closed', 'resolved')),
+    outcome         TEXT NULL CHECK (outcome IN ('yes', 'no')),
+    b               NUMERIC DEFAULT 100,                                                    -- liquidity parameter, need to decide on, can't change it with markets up
+    q_yes           NUMERIC DEFAULT 0,
+    q_no            NUMERIC DEFAULT 0,
+    resolved_at     TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ DEFAULT now()
+);
+
+-- Every buy ever made and the price history for the odds chart
+CREATE TABLE trades (
+    id           SERIAL PRIMARY KEY,
+    user_id      INTEGER REFERENCES users (id),
+    market_id    INTEGER REFERENCES markets (id),
+    side         TEXT CHECK (side IN ('yes', 'no')),
+    shares       INTEGER CHECK (shares > 0),
+    cost_cents   INTEGER,
+    price_before NUMERIC, 
+    price_after  NUMERIC,
+    traded_at    TIMESTAMPTZ DEFAULT now()
+);
+
+-- What each user currently holds in each market (many-to-many)
+CREATE TABLE positions (
+    user_id    INTEGER REFERENCES users (id),
+    market_id  INTEGER REFERENCES markets (id),
+    shares_yes INTEGER NOT NULL DEFAULT 0,
+    shares_no  INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, market_id)
+);
+
+-- Home page: open questions, ordered by closing time
+CREATE INDEX markets_status_closes_at_index ON markets (status, closes_at);
+
+-- Question page and odds chart: one market's trades, ordered by time made
+CREATE INDEX trades_market_id_traded_at_index ON trades (market_id, traded_at);
