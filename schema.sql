@@ -1,5 +1,6 @@
 -- Eli markets partial schema: users, markets, trades, positions
 -- Rerunnable: the drop below wipes the tables (and their data) every run
+-- Money is in integer cents, so 100000 is 1000 coins
 
 DROP TABLE IF EXISTS positions, trades, markets, users CASCADE;
 
