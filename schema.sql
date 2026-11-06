@@ -2,7 +2,7 @@
 -- Rerunnable: the drop below wipes the tables (and their data) every run
 -- Money is in integer cents, so 100000 is 1000 coins
 
-DROP TABLE IF EXISTS positions, trades, markets, users CASCADE;
+DROP TABLE IF EXISTS sessions, positions, trades, markets, users CASCADE;
 
 -- Everyone who can hold coins: students, the admin account, the AI player
 CREATE TABLE users (
@@ -16,6 +16,14 @@ CREATE TABLE users (
     is_admin      BOOLEAN DEFAULT FALSE,
     created_at    TIMESTAMPTZ DEFAULT now() 
 );
+
+CREATE TABLE sessions (
+    session_id   TEXT PRIMARY KEY,
+    session_data TEXT NOT NULL,
+    expires_at   TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX sessions_expires_at_index ON sessions (expires_at);
 
 -- One row per question, q_yes, q_no and b are the LMSR parameters 
 CREATE TABLE markets (
