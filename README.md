@@ -23,7 +23,7 @@ A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
    cp .env.example .env
    ```
 
-3. Load the database (once schema.sql and seed.sql are filled in):
+3. Load the database:
 
    ```bash
    psql elimarkets -f schema.sql
