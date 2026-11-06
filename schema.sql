@@ -24,11 +24,11 @@ CREATE TABLE markets (
     description     TEXT,
     resolution_rule TEXT NOT NULL,
     closes_at       TIMESTAMPTZ NOT NULL, 
-    status          TEXT DEFAULT 'open' CHECK (status IN ('open', 'closed', 'resolved')),
+    status          TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed', 'resolved')),
     outcome         TEXT NULL CHECK (outcome IN ('yes', 'no')),
-    b               NUMERIC DEFAULT 100,                                                    -- liquidity parameter, need to decide on, can't change it with markets up
-    q_yes           NUMERIC DEFAULT 0,
-    q_no            NUMERIC DEFAULT 0,
+    b               NUMERIC NOT NULL DEFAULT 100,                                                    -- liquidity parameter, need to decide on, can't change it with markets up
+    q_yes           NUMERIC NOT NULL DEFAULT 0,
+    q_no            NUMERIC NOT NULL DEFAULT 0,
     resolved_at     TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT now()
 );
@@ -36,13 +36,13 @@ CREATE TABLE markets (
 -- Every buy ever made and the price history for the odds chart
 CREATE TABLE trades (
     id           SERIAL PRIMARY KEY,
-    user_id      INTEGER REFERENCES users (id),
-    market_id    INTEGER REFERENCES markets (id),
-    side         TEXT CHECK (side IN ('yes', 'no')),
-    shares       INTEGER CHECK (shares > 0),
-    cost_cents   INTEGER,
-    price_before NUMERIC, 
-    price_after  NUMERIC,
+    user_id      INTEGER NOT NULL REFERENCES users (id),
+    market_id    INTEGER NOT NULL REFERENCES markets (id),
+    side         TEXT NOT NULL CHECK (side IN ('yes', 'no')),
+    shares       INTEGER NOT NULL CHECK (shares > 0),
+    cost_cents   INTEGER NOT NULL,
+    price_before NUMERIC NOT NULL, 
+    price_after  NUMERIC NOT NULL,
     traded_at    TIMESTAMPTZ DEFAULT now()
 );
 
