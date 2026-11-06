@@ -1,12 +1,3 @@
-:root {
-  color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #17251f;
-  background: #f5f7f5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -14,51 +5,40 @@
 body {
   margin: 0;
   min-width: 320px;
+  color: #222;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.45;
 }
 
 a {
-  color: #176b4a;
+  color: #0645ad;
 }
 
 .site-header {
-  min-height: 72px;
-  padding: 0 clamp(20px, 6vw, 88px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  background: #fff;
-  border-bottom: 1px solid #e4e9e5;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ccc;
 }
 
 .brand {
-  color: #163d2d;
-  font-size: 1.15rem;
-  font-weight: 750;
-  letter-spacing: -0.03em;
-  text-decoration: none;
+  color: inherit;
+  font-weight: bold;
 }
 
 .site-header nav {
   display: flex;
   align-items: center;
-  gap: 22px;
-  font-size: 0.94rem;
+  gap: 14px;
 }
 
 .site-header nav a,
 .nav-button {
-  color: #284337;
+  color: #0645ad;
   font: inherit;
-  text-decoration: none;
-}
-
-.account-name {
-  font-weight: 600;
-}
-
-.balance {
-  color: #51665b;
 }
 
 .inline-form {
@@ -69,157 +49,97 @@ a {
   padding: 0;
   background: none;
   border: 0;
+  text-decoration: underline;
   cursor: pointer;
 }
 
 .nav-signup {
-  padding: 9px 14px;
-  color: #fff !important;
-  background: #176b4a;
-  border-radius: 7px;
+  color: #0645ad;
 }
 
 .page {
-  width: min(100% - 32px, 1040px);
-  margin: 56px auto;
+  width: min(100% - 32px, 900px);
+  margin: 24px auto;
 }
 
 .auth-card,
 .welcome-card {
-  width: min(100%, 470px);
+  width: min(100%, 520px);
   margin: 0 auto;
-  padding: clamp(24px, 5vw, 40px);
-  background: #fff;
-  border: 1px solid #e4e9e5;
-  border-radius: 14px;
-  box-shadow: 0 12px 35px rgb(22 61 45 / 6%);
-}
-
-.welcome-card {
-  width: min(100%, 700px);
-  padding: 52px;
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #176b4a;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
 }
 
 h1 {
   margin: 0 0 12px;
-  color: #183b2d;
-  font-size: clamp(1.8rem, 5vw, 2.25rem);
-  letter-spacing: -0.04em;
+  font-size: 1.8rem;
 }
 
 .form-intro,
 .welcome-card > p:last-child {
-  margin: 0 0 24px;
-  color: #607066;
-  line-height: 1.55;
+  margin: 0 0 18px;
 }
 
 .form-field {
-  margin: 20px 0;
+  margin: 14px 0;
 }
 
 .form-field label {
   display: block;
-  margin-bottom: 7px;
-  color: #263d32;
-  font-size: 0.9rem;
-  font-weight: 650;
+  margin-bottom: 4px;
 }
 
 .form-field input {
   display: block;
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  color: #17251f;
-  background: #fff;
-  border: 1px solid #cbd6ce;
-  border-radius: 7px;
+  max-width: 420px;
+  padding: 6px;
   font: inherit;
-}
-
-.form-field input:focus {
-  border-color: #176b4a;
-  outline: 3px solid rgb(23 107 74 / 15%);
 }
 
 .form-field small {
   display: block;
-  margin-top: 6px;
-  color: #68786e;
+  margin-top: 4px;
 }
 
 .field-error {
-  margin: 6px 0 0;
-  color: #a12c2c;
-  font-size: 0.86rem;
+  margin: 4px 0 0;
+  color: #a00;
 }
 
-.primary-button {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 4px;
-  color: #fff;
-  background: #176b4a;
-  border: 0;
-  border-radius: 7px;
+.primary-button,
+button,
+select,
+input {
   font: inherit;
-  font-weight: 700;
-  cursor: pointer;
 }
 
-.primary-button:hover,
-.nav-signup:hover {
-  background: #10583c;
+.primary-button,
+button {
+  padding: 5px 10px;
 }
 
 .auth-switch {
-  margin: 22px 0 0;
-  color: #607066;
-  font-size: 0.92rem;
-  text-align: center;
+  margin-top: 18px;
 }
 
 .notice {
-  width: min(100%, 700px);
-  margin: 0 auto 18px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #edf4ef;
-  color: #24553c;
+  margin: 0 0 16px;
 }
 
 .notice-error {
-  color: #8d2929;
-  background: #fbeeee;
+  color: #a00;
 }
 
 @media (max-width: 560px) {
   .site-header {
-    padding: 14px 18px;
     align-items: flex-start;
   }
 
   .site-header nav {
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 12px;
-  }
-
-  .account-name {
-    display: none;
-  }
-
-  .page {
-    margin-top: 28px;
   }
 }
