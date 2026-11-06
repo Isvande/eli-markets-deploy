@@ -29,6 +29,10 @@ def create_app():
     CSRFProtect(app)
     app.register_blueprint(auth_bp)
 
+    from .markets import markets
+
+    app.register_blueprint(markets)
+
     @app.before_request
     def load_logged_in_user():
         if request.endpoint == "static":

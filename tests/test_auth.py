@@ -122,6 +122,13 @@ def test_home_page_requires_login(app):
     assert response.headers["Location"].endswith("/login")
 
 
+def test_market_routes_are_registered_and_require_login(app):
+    response = app.test_client().get("/markets/1")
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/login")
+
+
 def test_session_cookie_is_http_only_and_secure_when_configured(app):
     app.config["SESSION_COOKIE_SECURE"] = True
 
