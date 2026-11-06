@@ -36,7 +36,7 @@ VALUES
     'Will Yale win "The Game" in 2027?',
     'The 143rd edition of the oldest rivalry in college football.',
     'Resolves YES if Yale defeats Harvard in their 2027 varsity football game, according to the official final score posted by Yale Athletics. Resolves NO if Harvard wins or if the game is not played by December 31, 2027.',
-    '2027-12-31 23:59:00 America/New_York'
+    '2027-11-20 23:59:00 America/New_York'
 
 ),
 (
@@ -44,7 +44,7 @@ VALUES
     'Will Yale''s admission rate for the Class of 2031 be under 4%?',
     'Admission keeps getting more competitive, will the trend continue?',
     'Resolves YES if the overall admission rate Yale College officially reports for the Class of 2031 (all rounds combined) is below 4.00%. Resolves NO if it is 4.00% or higher, or if Yale has not published a rate by May 1, 2027.',
-    '2027-04-30 23:59:00 America/New_York'
+    '2027-03-30 23:59:00 America/New_York'
 );
 
 COMMIT;
