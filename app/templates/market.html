@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ market.question }}</title></head>
+<body>
+  <h1>{{ market.question }}</h1>
+  <p>{{ market.description or '' }}</p>
+  <p>Resolution: {{ market.resolution_rule }}</p>
+  <p>Yes: {{ '%.2f'|format(probability * 100) }}%</p>
+  {% for message in get_flashed_messages() %}<p>{{ message }}</p>{% endfor %}
+  {% if market.is_open %}
+  <form method="post" action="{{ url_for('markets.preview', market_id=market.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Side <select name="side"><option value="yes">Yes</option><option value="no">No</option></select></label>
+    <label>Shares <input type="number" name="shares" min="1" step="1" required></label>
+    <button type="submit">Review purchase</button>
+  </form>
+  {% else %}<p>This market is closed.</p>{% endif %}
+</body>
+</html>

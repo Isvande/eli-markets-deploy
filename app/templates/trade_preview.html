@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Review purchase</title></head>
+<body>
+  <h1>Review purchase</h1>
+  <p>{{ shares }} {{ side }} shares</p>
+  <p>Cost: {{ '%.2f'|format(charge / 100) }} coins</p>
+  <p>New yes probability: {{ '%.2f'|format(after * 100) }}%</p>
+  <form method="post" action="{{ url_for('markets.trade', market_id=market_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="side" value="{{ side }}">
+    <input type="hidden" name="shares" value="{{ shares }}">
+    <input type="hidden" name="charge" value="{{ charge }}">
+    <button type="submit">Confirm purchase</button>
+  </form>
+  <a href="{{ url_for('markets.market_detail', market_id=market_id) }}">Cancel</a>
+</body>
+</html>
