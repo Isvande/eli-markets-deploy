@@ -1,12 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Review purchase</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Review purchase{% endblock %}
+{% block content %}
   <h1>Review purchase</h1>
   <p>{{ shares }} {{ side }} shares</p>
   <p>Cost: {{ '%.2f'|format(charge / 100) }} coins</p>
@@ -19,5 +13,4 @@
     <button type="submit">Confirm purchase</button>
   </form>
   <a href="{{ url_for('markets.market_detail', market_id=market_id) }}">Cancel</a>
-</body>
-</html>
+{% endblock %}

@@ -2,7 +2,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, s
 from flask_wtf.csrf import generate_csrf
 
 from .compute import price_yes, trade_cost_cents
-from .db import get_conn
+from .db import get_conn, query_all
 
 markets = Blueprint("markets", __name__)
 
@@ -52,6 +52,14 @@ def buy_shares(conn, user_id, market_id, side, shares, expected_cost_cents):
             (user_id, market_id, side, shares, charge, before, after),
         )
     return charge
+
+
+def open_markets():
+    rows = query_all(
+        "SELECT id, question, closes_at AT TIME ZONE 'America/New_York' AS closes_local, q_yes, q_no, b "
+        "FROM markets WHERE status = 'open' AND closes_at > now() ORDER BY closes_at"
+    )
+    return [{**row, "probability": price_yes(float(row["q_yes"]), float(row["q_no"]), float(row["b"]))} for row in rows]
 
 
 @markets.get("/markets/<int:market_id>")

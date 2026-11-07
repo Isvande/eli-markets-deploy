@@ -32,6 +32,7 @@ def app(monkeypatch):
 
     monkeypatch.setattr("app.sessions.get_conn", lambda: session_store)
     monkeypatch.setattr("app.sessions.query_one", load_session)
+    monkeypatch.setattr("app.markets.query_all", lambda sql: [])
     return application
 
 

@@ -1,17 +1,10 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ market.question }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}{{ market.question }}{% endblock %}
+{% block content %}
   <h1>{{ market.question }}</h1>
   <p>{{ market.description or '' }}</p>
   <p>Resolution: {{ market.resolution_rule }}</p>
   <p>Yes: {{ '%.2f'|format(probability * 100) }}%</p>
-  {% for message in get_flashed_messages() %}<p>{{ message }}</p>{% endfor %}
   {% if market.is_open %}
   <form method="post" action="{{ url_for('markets.preview', market_id=market.id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -20,5 +13,4 @@
     <button type="submit">Review purchase</button>
   </form>
   {% else %}<p>This market is closed.</p>{% endif %}
-</body>
-</html>
+{% endblock %}

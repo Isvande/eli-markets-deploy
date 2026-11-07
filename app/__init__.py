@@ -29,7 +29,7 @@ def create_app():
     CSRFProtect(app)
     app.register_blueprint(auth_bp)
 
-    from .markets import markets
+    from .markets import markets, open_markets
 
     app.register_blueprint(markets)
 
@@ -61,7 +61,7 @@ def create_app():
 
     @app.route("/")
     def index():
-        return render_template("index.html")
+           return render_template("index.html", markets=open_markets())
 
     @app.errorhandler(CSRFError)
     def handle_csrf_error(error):

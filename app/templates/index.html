@@ -6,6 +6,18 @@
   <section class="welcome-card">
     <p class="eyebrow">Yale's prediction market</p>
     <h1>Welcome, {{ g.user.display_name }}.</h1>
-    <p>Your account is ready. Open markets will appear here as they are added.</p>
+    <h2>Open questions</h2>
+    {% if markets %}
+      <ul class="market-list">
+        {% for market in markets %}
+          <li>
+            <a href="{{ url_for('markets.market_detail', market_id=market.id) }}">{{ market.question }}</a>
+            <p>Yes: {{ '%.0f'|format(market.probability * 100) }}%, closes {{ market.closes_local.strftime('%b %d, %Y') }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No questions are open right now.</p>
+    {% endif %}
   </section>
 {% endblock %}
