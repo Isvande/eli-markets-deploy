@@ -4,6 +4,8 @@
 
 A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
 
+## Live URL: https://eli-markets-deploy.onrender.com/
+
 ## Run it locally
 
 1. Install PostgreSQL (Mac):
