@@ -35,7 +35,7 @@ CREATE TABLE markets (
     closes_at       TIMESTAMPTZ NOT NULL, 
     status          TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed', 'resolved')),
     outcome         TEXT NULL CHECK (outcome IN ('yes', 'no')),
-    b               NUMERIC NOT NULL DEFAULT 100,                                                    -- liquidity parameter, need to decide on, can't change it with markets up
+    b               NUMERIC NOT NULL DEFAULT 100,                                                    -- liquidity parameter: 100 for every market, changing it after trades exist reprices the market
     q_yes           NUMERIC NOT NULL DEFAULT 0,
     q_no            NUMERIC NOT NULL DEFAULT 0,
     resolved_at     TIMESTAMPTZ,
