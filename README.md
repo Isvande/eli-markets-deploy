@@ -39,6 +39,7 @@ A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
    ```bash
    psql elimarkets -f migrations/001_sessions.sql
    psql elimarkets -f migrations/002_alpha_tables.sql
+   psql elimarkets -f migrations/003_alpha_seed.sql
    ```
 
 4. Start the app:
