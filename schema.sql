@@ -2,7 +2,7 @@
 -- Rerunnable: the drop below wipes the tables (and their data) every run
 -- Money is in integer cents, so 100000 is 1000 coins
 
-DROP TABLE IF EXISTS sessions, disputes, comments, forecasts, market_tags, tags, sessions, positions, trades, markets, users CASCADE;
+DROP TABLE IF EXISTS disputes, comments, forecasts, market_tags, tags, sessions, positions, trades, markets, users CASCADE;
 
 -- Everyone who can hold coins: students, the admin account, the AI player
 CREATE TABLE users (
@@ -120,4 +120,4 @@ CREATE INDEX trades_market_id_traded_at_index ON trades (market_id, traded_at);
 CREATE INDEX comments_market_id_created_at_index ON comments (market_id, created_at);
 
 -- Brier score: each student's forecasts on one market
-CREATE INDEX forecasts_market_id_user_id_index ON forecasts (market_id, uder_id, made_at);
+CREATE INDEX forecasts_market_id_user_id_index ON forecasts (market_id, user_id, made_at);

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS market_tags (
 CREATE TABLE IF NOT EXISTS forecasts (
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER NOT NULL REFERENCES users (id),
-    market(id)    INTEGER NOT NULL REFERENCES markets(id),
+    market_id    INTEGER NOT NULL REFERENCES markets(id),
     probability   NUMERIC NOT NULL CHECK (probability BETWEEN 0 AND 1),
     justification TEXT,
     made_at       TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -45,6 +45,6 @@ CREATE TABLE IF NOT EXISTS disputes (
 
 CREATE INDEX IF NOT EXISTS comments_market_id_created_at_index ON comments (market_id, created_at);
 
-CREATE INDEX IF NOT EXISTS forecasts_market_id_user_id_index ON forecasts (market_id, uder_id, made_at);
+CREATE INDEX IF NOT EXISTS forecasts_market_id_user_id_index ON forecasts (market_id, user_id, made_at);
 
 COMMIT;
