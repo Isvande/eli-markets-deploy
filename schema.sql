@@ -82,7 +82,7 @@ CREATE TABLE market_tags (
 CREATE TABLE forecasts (
     id            SERIAL PRIMARY KEY,
     user_id       INTEGER NOT NULL REFERENCES users (id),
-    market(id)    INTEGER NOT NULL REFERENCES markets(id),
+    market_id    INTEGER NOT NULL REFERENCES markets(id),
     probability   NUMERIC NOT NULL CHECK (probability BETWEEN 0 AND 1),
     justification TEXT,
     made_at       TIMESTAMPTZ NOT NULL DEFAULT now()
