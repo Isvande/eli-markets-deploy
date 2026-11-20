@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from flask_wtf.csrf import generate_csrf
 
-from .compute import price_yes, trade_cost_cents
+from .compute import payout_cents, price_yes, trade_cost_cents
 from .db import get_conn, query_all
 
 markets = Blueprint("markets", __name__)
@@ -65,7 +65,8 @@ def open_markets():
 @markets.get("/markets/<int:market_id>")
 def market_detail(market_id):
     market = get_conn().execute(
-        "SELECT *, (status = 'open' AND closes_at > now()) AS is_open FROM markets WHERE id = %s", (market_id,)
+        "SELECT *, (status = 'open' AND closes_at > now()) AS is_open, "
+        "(closes_at <= now()) AS has_closed FROM markets WHERE id = %s", (market_id,)
     ).fetchone()
     if market is None:
         abort(404)
@@ -103,4 +104,56 @@ def trade(market_id):
         flash("Purchase complete.")
     except (ValueError, OverflowError) as exc:
         flash(str(exc) if isinstance(exc, TradeError) else "Invalid purchase.")
+    return redirect(url_for("markets.market_detail", market_id=market_id))
+
+
+def settle_market(conn, market_id, user_id, outcome):
+    if outcome not in ("yes", "no"):
+        raise TradeError("Choose yes or no.")
+
+    with conn.transaction():
+        market = conn.execute(
+            "SELECT creator_id, status, closes_at <= now() AS has_closed FROM markets WHERE id = %s FOR UPDATE",
+            (market_id,),
+        ).fetchone()
+        if market is None:
+            raise TradeError("This market does not exist.")
+        if market["creator_id"] != user_id:
+            raise TradeError("Only the creator can settle this market.")
+        if market["status"] == "resolved":
+            raise TradeError("This market is already settled.")
+        if not market["has_closed"]:
+            raise TradeError("You can settle a market only after its closing date.")
+
+        holders = conn.execute(
+            "SELECT user_id, shares_yes, shares_no FROM positions WHERE market_id = %s",
+            (market_id,),
+        ).fetchall()
+        total = 0
+        for row in holders:
+            amount = payout_cents(row["shares_yes"], row["shares_no"], outcome)
+            if amount > 0:
+                conn.execute(
+                    "UPDATE users SET balance_cents = balance_cents + %s WHERE id = %s",
+                    (amount, row["user_id"]),
+                )
+                total += amount
+
+        conn.execute(
+            "UPDATE markets SET status = 'resolved', outcome = %s, resolved_at = now() WHERE id = %s",
+            (outcome, market_id),
+        )
+    return total
+
+
+@markets.post("/markets/<int:market_id>/settle")
+def settle(market_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        abort(401)
+    try:
+        paid = settle_market(get_conn(), market_id, user_id, request.form.get("outcome"))
+        flash(f"Market settled. {paid / 100:,.2f} coins paid to winners.")
+    except TradeError as exc:
+        flash(str(exc))
     return redirect(url_for("markets.market_detail", market_id=market_id))

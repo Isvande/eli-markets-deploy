@@ -12,5 +12,16 @@
     <label>Shares <input type="number" name="shares" min="1" step="1" required></label>
     <button type="submit">Review purchase</button>
   </form>
-  {% else %}<p>This market is closed.</p>{% endif %}
+  {% elif market.status == 'resolved' %}
+  <p>Settled: {{ market.outcome | upper }}</p>
+  {% else %}
+  <p>This market is closed.</p>
+  {% if g.user.id == market.creator_id and market.has_closed %}
+  <form method="post" action="{{ url_for('markets.settle', market_id=market.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Result <select name="outcome"><option value="yes">Yes</option><option value="no">No</option></select></label>
+    <button type="submit">Settle and pay winners</button>
+  </form>
+  {% endif %}
+  {% endif %}
 {% endblock %}
