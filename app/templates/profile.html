@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Your profile · Eli Markets{% endblock %}
+{% block content %}
+  <h1>{{ g.user.display_name }}</h1>
+  <p>Coins: {{ "{:,.2f}".format(g.user.balance_cents / 100) }}</p>
+  <p>
+    Accuracy (Brier score):
+    {% if brier is none %}no settled forecasts yet{% else %}{{ '%.3f'|format(brier) }} over {{ scored }} question{{ 's' if scored != 1 }} (lower is better){% endif %}
+  </p>
+
+  <h2>Your shares</h2>
+  {% if positions %}
+    <ul>
+      {% for p in positions %}
+        <li>
+          <a href="{{ url_for('markets.market_detail', market_id=p.id) }}">{{ p.question }}</a>:
+          {{ p.shares_yes }} yes, {{ p.shares_no }} no{% if p.status == 'resolved' %} (settled {{ p.outcome | upper }}){% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You don't hold any shares yet.</p>
+  {% endif %}
+
+  <h2>Trade history</h2>
+  {% if trades %}
+    <ul>
+      {% for t in trades %}
+        <li>
+          {{ t.traded_local.strftime('%b %d, %Y %I:%M %p') }}: bought {{ t.shares }} {{ t.side }} on
+          <a href="{{ url_for('markets.market_detail', market_id=t.market_id) }}">{{ t.question }}</a>
+          for {{ '%.2f'|format(t.cost_cents / 100) }} coins
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No trades yet.</p>
+  {% endif %}
+{% endblock %}

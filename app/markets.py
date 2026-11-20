@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
 from flask_wtf.csrf import generate_csrf
 
-from .compute import payout_cents, price_yes, trade_cost_cents
+from .compute import mean_brier, payout_cents, price_yes, trade_cost_cents
 from .db import get_conn, query_all
 
 markets = Blueprint("markets", __name__)
@@ -157,3 +157,32 @@ def settle(market_id):
     except TradeError as exc:
         flash(str(exc))
     return redirect(url_for("markets.market_detail", market_id=market_id))
+
+
+@markets.get("/profile")
+def profile():
+    user_id = session.get("user_id")
+    positions = query_all(
+        "SELECT m.id, m.question, m.status, m.outcome, p.shares_yes, p.shares_no "
+        "FROM positions p JOIN markets m ON m.id = p.market_id "
+        "WHERE p.user_id = %s AND (p.shares_yes > 0 OR p.shares_no > 0) ORDER BY m.closes_at",
+        (user_id,),
+    )
+    trades = query_all(
+        "SELECT t.traded_at AT TIME ZONE 'America/New_York' AS traded_local, m.id AS market_id, m.question, "
+        "t.side, t.shares, t.cost_cents "
+        "FROM trades t JOIN markets m ON m.id = t.market_id "
+        "WHERE t.user_id = %s ORDER BY t.traded_at DESC LIMIT 50",
+        (user_id,),
+    )
+    last_forecasts = query_all(
+        "SELECT DISTINCT ON (f.market_id) f.probability, m.outcome "
+        "FROM forecasts f JOIN markets m ON m.id = f.market_id "
+        "WHERE f.user_id = %s AND m.status = 'resolved' AND f.made_at < m.closes_at "
+        "ORDER BY f.market_id, f.made_at DESC",
+        (user_id,),
+    )
+    score = mean_brier([(float(row["probability"]), row["outcome"]) for row in last_forecasts])
+    return render_template(
+        "profile.html", positions=positions, trades=trades, brier=score, scored=len(last_forecasts)
+    )

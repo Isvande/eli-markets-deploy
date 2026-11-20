@@ -75,3 +75,63 @@ def test_settle_refuses_and_changes_nothing(market, message):
 def test_settle_rejects_bad_outcome():
     with pytest.raises(TradeError):
         settle_market(FakeConn(closed_market(), []), 9, 1, "maybe")
+
+
+class FakeSessionStore:
+    def __init__(self):
+        self.rows = {}
+
+    def execute(self, sql, params):
+        if sql.lstrip().startswith("DELETE"):
+            self.rows.pop(params[0], None)
+        else:
+            self.rows[params[0]] = {"session_data": params[1]}
+
+
+@pytest.fixture
+def client(monkeypatch):
+    monkeypatch.setenv("SECRET_KEY", "test-secret")
+    monkeypatch.setenv("SESSION_COOKIE_SECURE", "false")
+    app = create_app()
+    app.config.update(TESTING=True)
+    store = FakeSessionStore()
+    monkeypatch.setattr("app.sessions.get_conn", lambda: store)
+    monkeypatch.setattr("app.sessions.query_one", lambda _sql, params: store.rows.get(params[0]))
+    monkeypatch.setattr("app.query_one", Mock(return_value={
+        "id": 12, "yale_email": "student@yale.edu", "display_name": "Student", "balance_cents": 123450,
+    }))
+    return app.test_client()
+
+
+def test_profile_requires_login(client, monkeypatch):
+    monkeypatch.setattr("app.query_one", Mock(return_value=None))
+    response = client.get("/profile")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/login")
+
+
+def test_profile_shows_coins_shares_trades_and_brier(client, monkeypatch):
+    monkeypatch.setattr(markets, "query_all", Mock(side_effect=[
+        [{"id": 4, "question": "Will it snow?", "status": "open", "outcome": None, "shares_yes": 10, "shares_no": 0}],
+        [{"traded_local": datetime(2026, 11, 20, 14, 5), "market_id": 4, "question": "Will it snow?",
+          "side": "yes", "shares": 10, "cost_cents": 512}],
+        [{"probability": 0.7, "outcome": "yes"}, {"probability": 0.2, "outcome": "no"}],
+    ]))
+    with client.session_transaction() as s:
+        s["user_id"] = 12
+
+    page = client.get("/profile").data
+    assert b"1,234.50" in page
+    assert b"10 yes, 0 no" in page
+    assert b"5.12 coins" in page
+    assert b"0.065 over 2 questions" in page
+
+
+def test_profile_without_settled_forecasts(client, monkeypatch):
+    monkeypatch.setattr(markets, "query_all", Mock(side_effect=[[], [], []]))
+    with client.session_transaction() as s:
+        s["user_id"] = 12
+
+    page = client.get("/profile").data
+    assert b"no settled forecasts yet" in page
+    assert b"No trades yet." in page
