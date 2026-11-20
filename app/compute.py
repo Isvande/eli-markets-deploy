@@ -45,3 +45,25 @@ def trade_cost(q_yes, q_no, side, shares, b=100):
 
 def trade_cost_cents(q_yes, q_no, side, shares, b=100):
     return math.ceil(trade_cost(q_yes, q_no, side, shares, b) * 100)
+
+
+def payout_cents(shares_yes, shares_no, outcome):
+    if outcome not in ("yes", "no"):
+        raise ValueError("outcome must be 'yes' or 'no'")
+    if shares_yes < 0 or shares_no < 0:
+        raise ValueError("shares must be nonnegative")
+    return (shares_yes if outcome == "yes" else shares_no) * 100
+
+
+def brier(probability, outcome):
+    if not 0 <= probability <= 1:
+        raise ValueError("probability must be between 0 and 1")
+    if outcome not in ("yes", "no"):
+        raise ValueError("outcome must be 'yes' or 'no'")
+    return (probability - (1 if outcome == "yes" else 0)) ** 2
+
+
+def mean_brier(forecasts):
+    if not forecasts:
+        return None
+    return sum(brier(probability, outcome) for probability, outcome in forecasts) / len(forecasts)

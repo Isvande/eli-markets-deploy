@@ -1,8 +1,7 @@
-# Test the pricing calculations
 import math
 import pytest
  
-from app.compute import cost, price_yes, trade_cost, trade_cost_cents
+from app.compute import brier, cost, mean_brier, payout_cents, price_yes, trade_cost, trade_cost_cents
  
  
 @pytest.mark.parametrize("shares", [0, 250])
@@ -68,7 +67,6 @@ def test_huge_trade_does_not_overflow():
     assert trade_cost(0, 0, "yes", 10_000_000) == pytest.approx(10_000_000 - 100 * math.log(2))
  
  
-# ("yes", 3) costs 156.37 cents, so rounding to nearest would undercharge
 @pytest.mark.parametrize("side, shares", [("yes", 3), ("no", 7), ("yes", 333)])
 def test_cents_round_up_so_the_market_never_undercharges(side, shares):
     exact_cents = trade_cost(12, 5, side, shares) * 100
@@ -107,3 +105,45 @@ def test_rejects_nan_and_infinity(bad):
         price_yes(bad, 0)
     with pytest.raises(ValueError):
         trade_cost(0, 0, "yes", 10, b=bad)
+
+
+def test_payout_pays_one_coin_per_winning_share():
+    assert payout_cents(30, 10, "yes") == 3000
+    assert payout_cents(30, 10, "no") == 1000
+    assert payout_cents(0, 50, "yes") == 0
+
+
+@pytest.mark.parametrize("outcome", ["maybe", "YES", None])
+def test_payout_rejects_invalid_outcome(outcome):
+    with pytest.raises(ValueError):
+        payout_cents(1, 1, outcome)
+
+
+@pytest.mark.parametrize("shares_yes, shares_no", [(-1, 0), (0, -1)])
+def test_payout_rejects_negative_shares(shares_yes, shares_no):
+    with pytest.raises(ValueError):
+        payout_cents(shares_yes, shares_no, "yes")
+
+
+def test_brier_known_values():
+    assert brier(1.0, "yes") == 0
+    assert brier(0.0, "yes") == 1
+    assert brier(0.7, "yes") == pytest.approx(0.09)
+    assert brier(0.7, "no") == pytest.approx(0.49)
+    assert brier(0.5, "yes") == brier(0.5, "no") == pytest.approx(0.25)
+
+
+@pytest.mark.parametrize("probability", [-0.1, 1.1, math.nan])
+def test_brier_rejects_bad_probability(probability):
+    with pytest.raises(ValueError):
+        brier(probability, "yes")
+
+
+def test_brier_rejects_invalid_outcome():
+    with pytest.raises(ValueError):
+        brier(0.5, "maybe")
+
+
+def test_mean_brier_averages_and_handles_empty():
+    assert mean_brier([(1.0, "yes"), (0.0, "yes")]) == pytest.approx(0.5)
+    assert mean_brier([]) is None
