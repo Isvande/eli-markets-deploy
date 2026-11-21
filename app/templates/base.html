@@ -11,6 +11,11 @@
     <a class="brand" href="{{ url_for('index') }}">Eli Markets</a>
     <nav aria-label="Main navigation">
       {% if g.user %}
+        <a href="{{ url_for('community.leaderboard') }}">Leaderboard</a>
+        {% if g.user.is_admin %}
+          <a href="{{ url_for('admin.new_market') }}">New question</a>
+          <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+        {% endif %}
         <a class="account-name" href="{{ url_for('markets.profile') }}">{{ g.user.display_name }}</a>
         <span class="balance">{{ "{:,.2f}".format(g.user.balance_cents / 100) }} coins</span>
         <form class="inline-form" action="{{ url_for('auth.logout') }}" method="post">

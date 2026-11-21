@@ -158,3 +158,135 @@ button {
 .market-list p {
   margin: 4px 0 0;
 }
+
+section {
+  margin: 24px 0;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  padding: 6px;
+  font: inherit;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.hint {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.tag-filter .current {
+  color: inherit;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.sort-form {
+  margin: 8px 0 4px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 1px 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  color: #444;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.odds-chart {
+  margin: 16px 0;
+  max-width: 640px;
+}
+
+.odds-chart svg {
+  width: 100%;
+  height: auto;
+  font-size: 12px;
+}
+
+.odds-chart .grid {
+  stroke: #e3e3e3;
+}
+
+.odds-chart .line {
+  fill: none;
+  stroke: #0645ad;
+  stroke-width: 2;
+}
+
+.odds-chart figcaption {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.comments,
+.disputes {
+  padding: 0;
+  list-style: none;
+}
+
+.comments li,
+.disputes li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.comments p,
+.disputes p {
+  margin: 4px 0;
+  white-space: pre-wrap;
+}
+
+fieldset.form-field {
+  border: 0;
+  padding: 0;
+}
+
+.checkbox {
+  display: inline-block;
+  margin-right: 12px;
+}
+
+.form-field textarea {
+  max-width: 420px;
+}
+
+.leaderboard {
+  border-collapse: collapse;
+}
+
+.leaderboard th,
+.leaderboard td {
+  padding: 4px 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.leaderboard .me {
+  font-weight: bold;
+}
+
+.checkbox input {
+  display: inline;
+  width: auto;
+}

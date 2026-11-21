@@ -40,6 +40,7 @@ A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
    psql elimarkets -f migrations/001_sessions.sql
    psql elimarkets -f migrations/002_alpha_tables.sql
    psql elimarkets -f migrations/003_alpha_seed.sql
+   psql elimarkets -f migrations/004_admin_login.sql
    ```
 
 4. Start the app:
@@ -56,3 +57,16 @@ A play-money prediction market for Yale students. CPSC 4190, Fall 2026.
    confirmation email to verify mailbox ownership.
    The local `.env.example` uses non-secure cookies for HTTP development; set
    `SESSION_COOKIE_SECURE=true` when serving the app over HTTPS.
+
+5. Log in as the admin to create questions, settle them and review disputes:
+
+   - Email: `elimarkets-admin@yale.edu`
+   - Password: `elimarkets-admin`
+
+   This account comes from `seed.sql`, or from migration 004 on a database
+   that already existed (step 3).
+   Admins see "New question" and "Admin" in the top bar and can settle any
+   closed question. Admins don't appear on the leaderboard.
+
+   To make another existing account an admin, run
+   `flask --app wsgi make-admin someone@yale.edu`.

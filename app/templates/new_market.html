@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}New question · Eli Markets{% endblock %}
+{% block content %}
+  <h1>New question</h1>
+  {% for error in errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-field">
+      <label for="question">Question</label>
+      <input id="question" name="question" maxlength="300" required value="{{ values.question or '' }}" placeholder="Will ...?">
+    </div>
+    <div class="form-field">
+      <label for="description">Description (optional)</label>
+      <textarea id="description" name="description" rows="2" maxlength="1000">{{ values.description or '' }}</textarea>
+    </div>
+    <div class="form-field">
+      <label for="resolution_rule">Resolution rule</label>
+      <textarea id="resolution_rule" name="resolution_rule" rows="4" maxlength="2000" required placeholder="Resolves YES if ... according to ... Resolves NO otherwise.">{{ values.resolution_rule or '' }}</textarea>
+    </div>
+    <div class="form-field">
+      <label for="closes_at">Closes at (New Haven time)</label>
+      <input id="closes_at" type="datetime-local" name="closes_at" required value="{{ values.closes_at or '' }}">
+    </div>
+    <fieldset class="form-field">
+      <legend>Categories</legend>
+      {% for tag in tags %}
+        <label class="checkbox"><input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in values.tags %}checked{% endif %}> {{ tag.name }}</label>
+      {% endfor %}
+    </fieldset>
+    <button class="primary-button" type="submit">Create question</button>
+  </form>
+{% endblock %}

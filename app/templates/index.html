@@ -7,15 +7,39 @@
     <p class="eyebrow">Yale's prediction market</p>
     <h1>Welcome, {{ g.user.display_name }}.</h1>
     <h2>Open questions</h2>
+
+    <nav class="tag-filter" aria-label="Categories">
+      <a href="{{ url_for('index', sort=sort) }}" {% if not current_tag %}class="current"{% endif %}>All</a>
+      {% for tag in tags %}
+        <a href="{{ url_for('index', tag=tag, sort=sort) }}" {% if current_tag == tag %}class="current"{% endif %}>{{ tag }}</a>
+      {% endfor %}
+    </nav>
+
+    <form class="sort-form" method="get" action="{{ url_for('index') }}">
+      {% if current_tag %}<input type="hidden" name="tag" value="{{ current_tag }}">{% endif %}
+      <label>Sort by
+        <select name="sort" onchange="this.form.submit()">
+          <option value="closing" {% if sort == 'closing' %}selected{% endif %}>Closing soonest</option>
+          <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+          <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most traded</option>
+          <option value="likely" {% if sort == 'likely' %}selected{% endif %}>Most likely yes</option>
+        </select>
+      </label>
+      <noscript><button type="submit">Sort</button></noscript>
+    </form>
+
     {% if markets %}
       <ul class="market-list">
         {% for market in markets %}
           <li>
             <a href="{{ url_for('markets.market_detail', market_id=market.id) }}">{{ market.question }}</a>
-            <p>Yes: {{ '%.0f'|format(market.probability * 100) }}%, closes {{ market.closes_local.strftime('%b %d, %Y') }}</p>
+            <p>Yes: {{ '%.0f'|format(market.probability * 100) }}%, closes {{ market.closes_local.strftime('%b %d, %Y') }}, {{ market.trade_count }} trade{{ 's' if market.trade_count != 1 }}</p>
+            {% if market.tags %}<p class="tags">{% for tag in market.tags %}<span class="tag">{{ tag }}</span>{% endfor %}</p>{% endif %}
           </li>
         {% endfor %}
       </ul>
+    {% elif current_tag %}
+      <p>No open questions in {{ current_tag }} right now.</p>
     {% else %}
       <p>No questions are open right now.</p>
     {% endif %}

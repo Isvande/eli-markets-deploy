@@ -1,12 +1,13 @@
 import os
 from datetime import timedelta
 
+import click
 from dotenv import load_dotenv
 from flask import Flask, flash, g, redirect, render_template, request, session, url_for
 from flask_wtf.csrf import CSRFError, CSRFProtect
 
 from .auth import auth_bp
-from .db import close_conn, query_one
+from .db import close_conn, query_all, query_one
 from .sessions import PostgresSessionInterface
 
 load_dotenv()
@@ -29,9 +30,23 @@ def create_app():
     CSRFProtect(app)
     app.register_blueprint(auth_bp)
 
-    from .markets import markets, open_markets
+    from .admin import admin
+    from .community import community
+    from .markets import SORTS, markets, open_markets
 
     app.register_blueprint(markets)
+    app.register_blueprint(admin)
+    app.register_blueprint(community)
+
+    @app.cli.command("make-admin")
+    @click.argument("email")
+    def make_admin(email):
+        """Give an existing account admin rights: flask --app wsgi make-admin you@yale.edu"""
+        user = query_one(
+            "UPDATE users SET is_admin = TRUE WHERE yale_email = %s RETURNING display_name",
+            (email.strip().lower(),),
+        )
+        click.echo(f"{user['display_name']} is now an admin." if user else "No account has that email.")
 
     @app.before_request
     def load_logged_in_user():
@@ -42,7 +57,7 @@ def create_app():
         g.user = (
             query_one(
                 """
-                SELECT id, yale_email, display_name, balance_cents
+                SELECT id, yale_email, display_name, balance_cents, is_admin
                 FROM users
                 WHERE id = %s AND is_ai = FALSE
                 """,
@@ -61,7 +76,12 @@ def create_app():
 
     @app.route("/")
     def index():
-           return render_template("index.html", markets=open_markets())
+        tag = request.args.get("tag") or None
+        sort = request.args.get("sort") if request.args.get("sort") in SORTS else "closing"
+        tags = [row["name"] for row in query_all("SELECT name FROM tags ORDER BY name")]
+        return render_template(
+            "index.html", markets=open_markets(tag, sort), tags=tags, current_tag=tag, sort=sort
+        )
 
     @app.errorhandler(CSRFError)
     def handle_csrf_error(error):

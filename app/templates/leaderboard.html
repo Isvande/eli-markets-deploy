@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard · Eli Markets{% endblock %}
+{% block content %}
+  <h1>Leaderboard</h1>
+  <nav class="tag-filter" aria-label="Leaderboard type">
+    <a href="{{ url_for('community.leaderboard', by='coins') }}" {% if by == 'coins' %}class="current"{% endif %}>By coins</a>
+    <a href="{{ url_for('community.leaderboard', by='brier') }}" {% if by == 'brier' %}class="current"{% endif %}>By accuracy</a>
+  </nav>
+  {% if by == 'brier' %}<p class="hint">Brier score on settled questions, lower is better. Only people with at least one scored forecast appear.</p>{% endif %}
+  {% if rows %}
+    <table class="leaderboard">
+      <thead><tr><th>#</th><th>Name</th>{% if by == 'coins' %}<th>Coins</th>{% else %}<th>Brier score</th><th>Questions</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for row in rows %}
+          <tr {% if row.id == g.user.id %}class="me"{% endif %}>
+            <td>{{ loop.index }}</td>
+            <td>{{ row.display_name }}</td>
+            {% if by == 'coins' %}
+              <td>{{ "{:,.2f}".format(row.balance_cents / 100) }}</td>
+            {% else %}
+              <td>{{ '%.3f'|format(row.brier) }}</td><td>{{ row.scored }}</td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>{{ 'No settled forecasts yet.' if by == 'brier' else 'No players yet.' }}</p>
+  {% endif %}
+{% endblock %}

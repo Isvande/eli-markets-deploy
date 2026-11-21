@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Admin · Eli Markets{% endblock %}
+{% block content %}
+  <h1>Admin</h1>
+  <p><a href="{{ url_for('admin.new_market') }}">Create a new question</a></p>
+
+  <h2>Closed questions waiting to be settled</h2>
+  {% if to_settle %}
+    <ul>
+      {% for m in to_settle %}
+        <li><a href="{{ url_for('markets.market_detail', market_id=m.id) }}">{{ m.question }}</a> (closed {{ m.closes_local.strftime('%b %d, %Y') }})</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Nothing to settle.</p>
+  {% endif %}
+
+  <h2>Open disputes</h2>
+  {% if disputes %}
+    <ul class="disputes">
+      {% for d in disputes %}
+        <li>
+          <a href="{{ url_for('markets.market_detail', market_id=d.market_id) }}">{{ d.question }}</a>
+          (settled {{ d.outcome | upper }})
+          <p>{{ d.display_name }}, {{ d.created_local.strftime('%b %d, %I:%M %p') }}: "{{ d.reason }}"</p>
+          <form class="inline-form" method="post" action="{{ url_for('admin.decide', dispute_id=d.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" name="decision" value="upheld">Keep {{ d.outcome | upper }}</button>
+            <button type="submit" name="decision" value="overturned">Overturn to {{ 'NO' if d.outcome == 'yes' else 'YES' }} and repay</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No open disputes.</p>
+  {% endif %}
+{% endblock %}

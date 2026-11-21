@@ -2,26 +2,114 @@
 {% block title %}{{ market.question }}{% endblock %}
 {% block content %}
   <h1>{{ market.question }}</h1>
+  {% if tags %}<p class="tags">{% for tag in tags %}<a class="tag" href="{{ url_for('index', tag=tag) }}">{{ tag }}</a>{% endfor %}</p>{% endif %}
   <p>{{ market.description or '' }}</p>
   <p>Resolution: {{ market.resolution_rule }}</p>
-  <p>Yes: {{ '%.2f'|format(probability * 100) }}%</p>
+  <p>Closes {{ market.closes_local.strftime('%b %d, %Y at %I:%M %p') }} (New Haven time)</p>
+  <p class="price">Yes: {{ '%.2f'|format(probability * 100) }}%</p>
+
+  <figure class="odds-chart">
+    <svg viewBox="-34 -8 644 228" role="img" aria-label="Chance of yes over time">
+      {% for level in [0, 25, 50, 75, 100] %}
+        {% set y = 200 - level * 2 %}
+        <line class="grid" x1="0" x2="600" y1="{{ y }}" y2="{{ y }}"></line>
+        <text x="-6" y="{{ y + 4 }}" text-anchor="end">{{ level }}%</text>
+      {% endfor %}
+      <polyline class="line" points="{{ chart }}"></polyline>
+      <text x="0" y="218">{{ market.created_at.strftime('%b %d') }}</text>
+      <text x="600" y="218" text-anchor="end">{{ chart_end.strftime('%b %d') }}</text>
+    </svg>
+    <figcaption>Chance of yes over time</figcaption>
+  </figure>
+
   {% if market.is_open %}
-  <form method="post" action="{{ url_for('markets.preview', market_id=market.id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Side <select name="side"><option value="yes">Yes</option><option value="no">No</option></select></label>
-    <label>Shares <input type="number" name="shares" min="1" step="1" required></label>
-    <button type="submit">Review purchase</button>
-  </form>
+  <section>
+    <h2>Trade</h2>
+    <form method="post" action="{{ url_for('markets.preview', market_id=market.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Side <select name="side"><option value="yes">Yes</option><option value="no">No</option></select></label>
+      <label>Shares <input type="number" name="shares" min="1" step="1" required></label>
+      <button type="submit">Review purchase</button>
+    </form>
+  </section>
   {% elif market.status == 'resolved' %}
-  <p>Settled: {{ market.outcome | upper }}</p>
+  <p class="price">Settled: {{ market.outcome | upper }}</p>
   {% else %}
   <p>This market is closed.</p>
-  {% if g.user.id == market.creator_id and market.has_closed %}
+  {% endif %}
+
+  {% if can_settle %}
   <form method="post" action="{{ url_for('markets.settle', market_id=market.id) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Result <select name="outcome"><option value="yes">Yes</option><option value="no">No</option></select></label>
     <button type="submit">Settle and pay winners</button>
   </form>
   {% endif %}
+
+  <section>
+    <h2>Forecasts</h2>
+    {% if crowd.people %}
+      <p>Average student forecast: {{ '%.0f'|format(crowd.average * 100) }}% from {{ crowd.people }} {{ 'person' if crowd.people == 1 else 'people' }}</p>
+    {% endif %}
+    {% if my_forecast %}
+      <p>Your latest forecast: {{ '%.0f'|format(my_forecast.probability * 100) }}%{% if my_forecast.justification %}: "{{ my_forecast.justification }}"{% endif %}</p>
+    {% endif %}
+    {% if market.is_open %}
+    <form method="post" action="{{ url_for('community.forecast', market_id=market.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Chance of yes (%) <input type="number" name="probability" min="0" max="100" step="1" required></label>
+      <label>Why? (optional) <input type="text" name="justification" maxlength="500"></label>
+      <button type="submit">{{ 'Update forecast' if my_forecast else 'Post forecast' }}</button>
+    </form>
+    <p class="hint">Your last forecast before the question closes counts toward your accuracy (Brier) score.</p>
+    {% elif not my_forecast %}
+      <p>Forecasting has closed.</p>
+    {% endif %}
+  </section>
+
+  {% if market.status == 'resolved' %}
+  <section>
+    <h2>Think this result is wrong?</h2>
+    {% if my_dispute %}
+      <p>You flagged this result. Status: {{ my_dispute.status }}.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('community.dispute', market_id=market.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Reason <input type="text" name="reason" minlength="10" maxlength="1000" required></label>
+      <button type="submit">Flag for admin review</button>
+    </form>
+    {% endif %}
+  </section>
   {% endif %}
+
+  <section>
+    <h2>Latest trades</h2>
+    {% if recent_trades %}
+      <ul>
+        {% for t in recent_trades %}
+          <li>{{ t.traded_local.strftime('%b %d, %I:%M %p') }}: {{ t.display_name }} bought {{ t.shares }} {{ t.side }} for {{ '%.2f'|format(t.cost_cents / 100) }} coins</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No trades yet.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Comments</h2>
+    <form method="post" action="{{ url_for('community.comment', market_id=market.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <textarea name="body" rows="3" maxlength="2000" required aria-label="Comment"></textarea>
+      <button type="submit">Post comment</button>
+    </form>
+    {% if comments %}
+      <ul class="comments">
+        {% for c in comments %}
+          <li><strong>{{ c.display_name }}</strong> <span class="hint">{{ c.created_local.strftime('%b %d, %I:%M %p') }}</span><p>{{ c.body }}</p></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No comments yet.</p>
+    {% endif %}
+  </section>
 {% endblock %}

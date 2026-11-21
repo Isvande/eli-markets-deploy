@@ -4,9 +4,10 @@
 
 BEGIN;
 
--- The admin account: no email or password hash so nobody can log in as it
+-- The admin account, with a shared demo login so graders can use the admin pages.
+-- The password is in the README: change it before opening the site to campus
 INSERT INTO users (display_name, yale_email, password_hash, is_admin)
-VALUES ('Eli Markets', NULL, NULL, TRUE);
+VALUES ('Eli Markets', 'elimarkets-admin@yale.edu', '$2b$12$38eniizFK30DJVeEKt4RM.3zhZfP3baW73vE4stcek5Lp5jFihWJi', TRUE);
 
 -- The categories for the home page filter
 INSERT INTO tags (name)
